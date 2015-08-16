@@ -1,0 +1,169 @@
+<!DOCETYPE html>
+<html>
+<head>
+    <title>Smart House</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/bootstrap/css/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="/local.css">
+    <title>exceed12</title>
+</head>
+<body>
+   <div class="container">
+        <div class="row">
+           <div class="head-top">
+               <img src="/img/Logo.png" class="img-responsive center-block">
+           </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 img-top">
+                <img src="/img/Dark.jpg" class="img-responsive center-block" id="room">
+            </div>    
+        </div>
+        <div class="row">
+           <div class="col-lg-4">
+                   <div id="tem1" class="button-width center-block">
+                       <button class="btn btn-default"><img class="img-reponsive centerblock" src="img/icon_bed_room.png" align="left">Bedroom</button>
+                   </div>
+                    <div id="tem1_menu" class="slider">
+                        <form method="post" action="demoform.asp">
+                            <label><span class="label label-default">Air condition</span></label>
+                            <input type="checkbox" data-role="flipswitch" id="checkbed">
+                        </form>
+                        <form method="post" action="demoform.asp">
+                            <div class="range center-block">
+                                <input type="range" id="tem_slider_bed" value="25" min="0" max="40" data-highlight="true">
+                            </div>
+                        </form>
+                    </div>
+           </div>
+            <div class="col-lg-4">
+                <div id="tem2" class="button-width center-block">
+                    <button class="btn btn-default"><img class="img-reponsive centerblock" src="img/icon_living_room.png" align="left">Living Area</button>
+                </div>
+                <div id="tem2_menu" class="slider">
+                    <form method="post" action="demoform.asp">
+                        <label><span class="label label-default">Air condition</span></label>
+                        <input type="checkbox" data-role="flipswitch" id="checkliving">
+                    </form>
+                    <form method="post" action="demoform.asp">
+                        <div class="range center-block">
+                            <input type="range" id="tem_slider_living" value="25" min="0" max="40" data-highlight="true">
+                        </div>
+                    </form>
+                </div>
+           </div>
+           <div class="col-lg-4">
+                    <div id="secure" class="button-width center-block">
+                       <button class="btn btn-default"><img class="img-reponsive centerblock" src="img/icon_security.png" align="left">Security</button>
+                    </div>
+                    <div id="secure_manu" class="slider">
+                        <form method="post" action="demoform.asp">
+                            <label for="switch"><span class="label label-default">ON/OFF</span></label>
+                            <input type="checkbox" data-role="flipswitch" id="checkSecure">
+                        </form>
+                    </div>
+                </div>
+        </div>
+</div>
+<script src="/bootstrap/js/jquery-2.1.4.min.js"></script>
+<script src="/bootstrap/js/jquery.mobile-1.4.5.min.js"></script>
+    <script>
+        //secure
+        setInterval(sendSecurity,2000);
+        setInterval(sendTemBedAndLiving,2000);
+        var board1 = setInterval(getBoard1,2000);
+        var board2 = setInterval(getBoard2,2000);
+        var out;
+        var tembed,temliving;
+        
+        function onGetDataBoard2(message){
+            var str = message.split(",");
+            if (str[0]!=tembed)
+            {
+                $("#tem_slider_bed").val(str[0]);
+                $("#tem_slider_bed").slider( "refresh" );
+                tembed=str[0];
+            }
+            if (str[1]!=temliving)
+            {
+                $("#tem_slider_living").val(str[1]);
+                $("#tem_slider_living").slider( "refresh" );
+                temliving=str[1];   
+            }
+        }
+        
+        function onGetDataBoard1(message){
+            if(message==1 && $("#checkSecure").is(":checked"))
+            {
+                $("#room").attr("src","/img/DANGERBOOOOOOMMMMM.jpg");
+                clearInterval(board1);
+            }
+            else if(message == 1 && !$("#checkSecure").is(":checked")){
+                $("#room").attr("src","/img/Lighting.jpg");
+                window.setTimeout(openLight,7000);
+                clearInterval(board1);
+            }
+            else if (message == 0 && $("#checkSecure").is(":checked")){
+                $("#room").attr("src","/img/dark.jpg");
+            }
+            else if (!$("#checkSecure").is(":checked") && message == 0){
+                $("#room").attr("src","/img/dark.jpg");
+            }
+        }
+
+        $(document).ready(function(){
+            $("#secure").click(function(){           
+                $("#secure_manu").slideToggle("slow");
+            });
+        });
+        //tem1
+        $(document).ready(function(){
+            $("#tem1").click(function(){ 
+                $("#tem1_menu").slideToggle("slow");
+            });
+        });
+        //tem2
+        $(document).ready(function(){
+            $("#tem2").click(function(){
+                $("#tem2_menu").slideToggle("slow");
+            });
+        });
+        //send bed
+        function sendTemBedAndLiving(){
+            $.post("http://exceed.cupco.de/iot/4/web2", {data:
+                (($("#checkbed").is(":checked"))?1:0)+","+
+                (($("#checkliving").is(":checked"))?1:0)});
+        }
+        //send security
+        function sendSecurity(){
+            $.post("http://exceed.cupco.de/iot/4/web1", {data: $("#checkSecure").is(":checked")});
+        }
+        //get bord2
+        function getBoard2(){
+            $.get("http://exceed.cupco.de/iot/4/board2",onGetDataBoard2);
+        }
+        
+        function getBoard1(){
+            $.get("http://exceed.cupco.de/iot/4/board1",onGetDataBoard1);
+        }
+        
+        function getOut(){
+            $.get("http://exceed.cupco.de/iot/4/board1",onGetDataOut);
+        }
+        
+        function onGetDataOut(message){
+            if (message==0){
+                clearInterval(out);
+                board1 = setInterval(getBoard1,2000);
+            }
+        }
+        
+        function openLight(){
+            $("#room").attr("src","/img/Lighting2.jpg");
+            out = setInterval(getOut,2000);
+        }
+    </script>
+</body>
+</html>

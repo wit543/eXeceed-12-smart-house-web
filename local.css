@@ -1,0 +1,28 @@
+.head-top{
+    padding-top: 0px;
+}
+.img-top{
+    padding-top: 10px;
+}
+.slider{
+    align-content: center;
+    padding-top: 10px; 
+    display: none;
+}
+.range{
+    width: 300px;
+}
+.slider-margin{
+    margin: 0%;
+}
+.button-width{
+    width: 50%;
+}
+.background{
+    background-size: cover;
+    background-image: url(/img/Wall.jpg); 
+    background-repeat: no-repeat;
+}
+.slider_menu{
+    border: solid;
+}
